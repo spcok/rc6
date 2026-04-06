@@ -35,10 +35,10 @@ export default function StandardForm({ logType, animal, date, userInitials, exis
         const safePayload = standardSchema.parse(value);
         const payload: Partial<LogEntry> = {
           id: existingLog?.id || uuidv4(),
-          animal_id: animal.id,
-          log_type: logType,
-          log_date: date,
-          user_initials: userInitials,
+          animalId: animal.id,
+          logType: logType,
+          logDate: date,
+          userInitials: userInitials,
           value: safePayload.value,
           notes: safePayload.notes
         };

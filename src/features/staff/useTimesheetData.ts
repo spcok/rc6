@@ -22,14 +22,26 @@ export function useTimesheetData() {
         const { data, error } = await supabase.from('timesheets').select('*');
         if (error) throw error;
         
+        const mappedData: Timesheet[] = data.map((item: Record<string, unknown>) => ({
+          id: item.id as string,
+          staffName: item.staff_name as string,
+          date: item.date as string,
+          clockIn: item.clock_in as string,
+          clockOut: item.clock_out as string | undefined,
+          totalHours: item.total_hours as number | undefined,
+          notes: item.notes as string | undefined,
+          status: item.status as TimesheetStatus,
+          updatedAt: (item.updated_at || item.created_at) as string,
+          isDeleted: item.is_deleted as boolean
+        }));
+
         // 2. REFRESH FAILOVER (Background)
-        data.forEach(item => {
-          const draft = item as Timesheet;
+        mappedData.forEach(item => {
           // Architectural Rule 3: Strict draft object mutation
-          timesheetsCollection.update(draft).catch(() => timesheetsCollection.insert(draft));
+          timesheetsCollection.update(item).catch(() => timesheetsCollection.insert(item));
         });
         
-        return data as Timesheet[];
+        return mappedData;
       } catch {
         console.warn("Network unreachable. Falling back to 14-day local vault.");
         // 3. OFFLINE FAILOVER
@@ -39,18 +51,26 @@ export function useTimesheetData() {
   });
 
   const clockInMutation = useMutation({
-    mutationFn: async (staff_name: string) => {
+    mutationFn: async (staffName: string) => {
       const newShift: Timesheet = {
         id: crypto.randomUUID(),
-        staff_name,
+        staffName,
         date: new Date().toISOString().split('T')[0],
-        clock_in: new Date().toISOString(),
+        clockIn: new Date().toISOString(),
         status: 'Active' as const,
-        is_deleted: false,
-        created_at: new Date().toISOString()
+        isDeleted: false,
+        updatedAt: new Date().toISOString()
       };
       
-      const cloudPayload = sanitizePayload(newShift);
+      const cloudPayload = sanitizePayload({
+        id: newShift.id,
+        staff_name: newShift.staffName,
+        date: newShift.date,
+        clock_in: newShift.clockIn,
+        status: newShift.status,
+        is_deleted: newShift.isDeleted,
+        created_at: newShift.updatedAt
+      });
 
       try {
         const { error } = await supabase.from('timesheets').insert([cloudPayload]);
@@ -70,11 +90,14 @@ export function useTimesheetData() {
       
       const updatedShift: Timesheet = {
         ...existing,
-        clock_out: new Date().toISOString(),
+        clockOut: new Date().toISOString(),
         status: 'Completed' as const
       };
       
-      const cloudPayload = sanitizePayload(updatedShift);
+      const cloudPayload = sanitizePayload({
+        clock_out: updatedShift.clockOut,
+        status: updatedShift.status
+      });
 
       try {
         const { error } = await supabase.from('timesheets').update(cloudPayload).eq('id', timesheetId);
@@ -83,7 +106,6 @@ export function useTimesheetData() {
         console.warn("Offline: Clocking out locally.");
       }
       
-      // Architectural Rule 3: Strict draft object mutation
       await timesheetsCollection.update(updatedShift);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['timesheets'] })
@@ -91,9 +113,20 @@ export function useTimesheetData() {
 
   const addTimesheetMutation = useMutation({
     mutationFn: async (timesheet: Omit<Timesheet, 'id'>) => {
-      const payload: Timesheet = { ...timesheet, id: crypto.randomUUID(), is_deleted: false };
+      const payload: Timesheet = { ...timesheet, id: crypto.randomUUID(), isDeleted: false };
       
-      const cloudPayload = sanitizePayload(payload);
+      const cloudPayload = sanitizePayload({
+        id: payload.id,
+        staff_name: payload.staffName,
+        date: payload.date,
+        clock_in: payload.clockIn,
+        clock_out: payload.clockOut,
+        total_hours: payload.totalHours,
+        notes: payload.notes,
+        status: payload.status,
+        updated_at: payload.updatedAt,
+        is_deleted: payload.isDeleted
+      });
 
       try {
         const { error } = await supabase.from('timesheets').insert([cloudPayload]);
@@ -120,15 +153,14 @@ export function useTimesheetData() {
         console.warn("Offline: Deleting timesheet locally.");
       }
       
-      // Architectural Rule 3: Strict draft object mutation
-      const deletedShift: Timesheet = { ...existing, is_deleted: true };
+      const deletedShift: Timesheet = { ...existing, isDeleted: true };
       await timesheetsCollection.update(deletedShift);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['timesheets'] })
   });
 
   return {
-    timesheets: timesheets.filter(t => !t.is_deleted),
+    timesheets: timesheets.filter(t => !t.isDeleted),
     isLoading,
     clockIn: clockInMutation.mutateAsync,
     clockOut: clockOutMutation.mutateAsync,
