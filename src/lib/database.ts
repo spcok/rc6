@@ -21,16 +21,8 @@ export const createStandardCollection = <T extends { id: string }>(tableName: st
       const { data, error } = await supabase.from(tableName).select('*').eq('is_deleted', false).limit(5000);
       if (error) throw error;
       return (data as T[]) || [];
-    },
-    onInsert: async (item: T) => {
-      const { error } = await supabase.from(tableName).upsert([item]);
-      if (error) throw new Error(`DB_SCHEMA_ERROR: ${error.message}`);
-    },
-    onUpdate: async (id: string, draft: Partial<T>) => {
-      const { error } = await supabase.from(tableName).update(draft).eq('id', id);
-      if (error) throw new Error(`DB_SCHEMA_ERROR: ${error.message}`);
-    },
-    sync: { enabled: true }
+    }
+    // ARCHITECTURAL FIX: onInsert, onUpdate, and sync hooks removed.
   });
 
   // ARCHITECTURAL FIX: Strict single-draft update adapter.
@@ -65,16 +57,8 @@ export const dailyLogsCollection = (() => {
         .limit(5000); 
       if (error) throw error;
       return (data as LogEntry[]) || [];
-    },
-    onInsert: async (item: LogEntry) => {
-      const { error } = await supabase.from('daily_logs').upsert([item]);
-      if (error) throw new Error(`DB_SCHEMA_ERROR: ${error.message}`);
-    },
-    onUpdate: async (id: string, draft: Partial<LogEntry>) => {
-      const { error } = await supabase.from('daily_logs').update(draft).eq('id', id);
-      if (error) throw new Error(`DB_SCHEMA_ERROR: ${error.message}`);
-    },
-    sync: { enabled: true }
+    }
+    // ARCHITECTURAL FIX: onInsert, onUpdate, and sync hooks removed.
   });
 
   const singleDraftUpdate = async (draft: Partial<LogEntry> & { id: string }) => {

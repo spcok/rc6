@@ -54,14 +54,21 @@ export const useDailyLogData = (_viewDate: string, activeCategory: AnimalCategor
   };
 
   const addLogEntryMutation = useMutation({
-    mutationFn: async (entry: Partial<LogEntry>) => {
+    onMutate: async (entry: Partial<LogEntry>) => {
+      // Optimistic Update: Save to local vault immediately
       const newEntry: LogEntry = {
         id: entry.id || crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         isDeleted: false,
         ...entry
       } as LogEntry;
-
+      await dailyLogsCollection.insert(newEntry);
+      return { newEntry };
+    },
+    mutationFn: async (entry: Partial<LogEntry>, variables, context) => {
+      // Use the context payload generated in onMutate, let network errors throw
+      const newEntry = (context as any)?.newEntry || { id: entry.id || crypto.randomUUID(), ...entry, isDeleted: false };
+      
       const supabasePayload = {
         id: newEntry.id,
         animal_id: newEntry.animalId,
@@ -77,25 +84,27 @@ export const useDailyLogData = (_viewDate: string, activeCategory: AnimalCategor
         basking_temp_c: newEntry.baskingTempC,
         cool_temp_c: newEntry.coolTempC,
         temperature_c: newEntry.temperatureC,
-        created_at: newEntry.createdAt,
+        created_at: newEntry.createdAt || new Date().toISOString(),
         created_by: newEntry.createdBy,
         integrity_seal: newEntry.integritySeal,
         updated_at: newEntry.updatedAt,
         is_deleted: newEntry.isDeleted
       };
 
-      try {
-        const { error } = await supabase.from('daily_logs').insert([supabasePayload]);
-        if (error) throw error;
-      } catch {
-        console.warn("Offline: Adding log entry locally.");
-      }
-      await dailyLogsCollection.insert(newEntry);
+      const { error } = await supabase.from('daily_logs').insert([supabasePayload]);
+      if (error) throw error; 
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
   });
 
   const updateLogEntryMutation = useMutation({
+    onMutate: async (entry: Partial<LogEntry>) => {
+      if (!entry.id) return;
+      const existing = logs.find(l => l.id === entry.id);
+      if (existing) {
+        await dailyLogsCollection.update({ ...existing, ...entry } as LogEntry & { id: string });
+      }
+    },
     mutationFn: async (entry: Partial<LogEntry>) => {
       if (!entry.id) throw new Error("Cannot update without an ID");
 
@@ -120,30 +129,24 @@ export const useDailyLogData = (_viewDate: string, activeCategory: AnimalCategor
         is_deleted: entry.isDeleted
       };
 
-      try {
-        const { error } = await supabase.from('daily_logs').update(supabasePayload).eq('id', entry.id);
-        if (error) throw error;
-      } catch {
-        console.warn("Offline: Updating log entry locally.");
-      }
-      const existing = logs.find(l => l.id === entry.id);
-      await dailyLogsCollection.update({ ...existing, ...entry } as LogEntry);
+      const { error } = await supabase.from('daily_logs').update(supabasePayload).eq('id', entry.id);
+      if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
   });
 
   const deleteLogEntryMutation = useMutation({
-    mutationFn: async (id: string) => {
-      try {
-        const { error } = await supabase.from('daily_logs').update({ is_deleted: true }).eq('id', id);
-        if (error) throw error;
-      } catch {
-        console.warn("Offline: Deleting log entry locally.");
-      }
+    onMutate: async (id: string) => {
       const existing = logs.find(l => l.id === id);
-      await dailyLogsCollection.update({ ...existing, isDeleted: true } as LogEntry);
+      if (existing) {
+        await dailyLogsCollection.update({ ...existing, isDeleted: true } as LogEntry & { id: string });
+      }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('daily_logs').update({ is_deleted: true }).eq('id', id);
+      if (error) throw error;
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['dailyLogs'] })
   });
 
   const filteredAnimals = useMemo(() => {
