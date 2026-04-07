@@ -33,59 +33,59 @@ export const useRotaData = () => {
   });
 
   const addShiftMutation = useMutation({
-    mutationFn: async (shift: Partial<Shift>) => {
+    onMutate: async (shift: Partial<Shift>) => {
       const payload = {
         ...shift,
         id: shift.id || crypto.randomUUID(),
         createdAt: new Date().toISOString(),
         isDeleted: false
       } as Shift;
-
-      try {
-        const { error } = await supabase.from('rota').insert([payload]);
-        if (error) throw error;
-      } catch {
-        console.warn("Offline: Adding shift locally.");
-      }
       await rotaCollection.insert(payload);
-      return payload;
+      return { payload };
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
+    mutationFn: async (shift: Partial<Shift>, variables, context) => {
+      const payload = (context as any)?.payload || {
+        ...shift,
+        id: shift.id || crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        isDeleted: false
+      };
+
+      const { error } = await supabase.from('rota').insert([payload]);
+      if (error) throw error;
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
   });
 
   const updateShiftMutation = useMutation({
-    mutationFn: async (shift: Partial<Shift>) => {
+    onMutate: async (shift: Partial<Shift>) => {
       const existing = shifts.find(s => s.id === shift.id);
       if (existing) {
         const updated = { ...existing, ...shift } as Shift;
-        try {
-          const { error } = await supabase.from('rota').update(updated).eq('id', shift.id);
-          if (error) throw error;
-        } catch {
-          console.warn("Offline: Updating shift locally.");
-        }
-        await rotaCollection.update(updated);
-        return updated;
+        await rotaCollection.update(updated as Shift & { id: string });
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
+    mutationFn: async (shift: Partial<Shift>) => {
+      if (!shift.id) throw new Error("Missing shift ID");
+      const { error } = await supabase.from('rota').update(shift).eq('id', shift.id);
+      if (error) throw error;
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
   });
 
   const deleteShiftMutation = useMutation({
-    mutationFn: async (id: string) => {
+    onMutate: async (id: string) => {
       const existing = shifts.find(s => s.id === id);
       if (existing) {
         const updated = { ...existing, isDeleted: true } as Shift;
-        try {
-          const { error } = await supabase.from('rota').update({ is_deleted: true }).eq('id', id);
-          if (error) throw error;
-        } catch {
-          console.warn("Offline: Deleting shift locally.");
-        }
-        await rotaCollection.update(updated);
+        await rotaCollection.update(updated as Shift & { id: string });
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('rota').update({ is_deleted: true }).eq('id', id);
+      if (error) throw error;
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['rota'] })
   });
 
   return { 
