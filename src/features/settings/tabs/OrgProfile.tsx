@@ -11,14 +11,14 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const schema = z.object({
   id: z.string(),
-  org_name: z.string().min(1, 'Organisation Name is required'),
-  logo_url: z.string().optional(),
-  contact_email: z.string().email('Invalid email'),
-  contact_phone: z.string().min(1, 'Contact Phone is required'),
+  orgName: z.string().min(1, 'Organisation Name is required'),
+  logoUrl: z.string().optional(),
+  contactEmail: z.string().email('Invalid email'),
+  contactPhone: z.string().min(1, 'Contact Phone is required'),
   address: z.string().min(1, 'Address is required'),
-  zla_license_number: z.string().min(1, 'ZLA Licence Number is required'),
-  official_website: z.string().optional(),
-  adoption_portal: z.string().optional(),
+  zlaLicenseNumber: z.string().min(1, 'ZLA Licence Number is required'),
+  officialWebsite: z.string().optional(),
+  adoptionPortal: z.string().optional(),
 });
 
 const OrgProfile: React.FC = () => {
@@ -30,14 +30,14 @@ const OrgProfile: React.FC = () => {
   const form = useForm({
     defaultValues: settings || {
       id: '',
-      org_name: '',
-      logo_url: '',
-      contact_email: '',
-      contact_phone: '',
+      orgName: '',
+      logoUrl: '',
+      contactEmail: '',
+      contactPhone: '',
       address: '',
-      zla_license_number: '',
-      official_website: '',
-      adoption_portal: '',
+      zlaLicenseNumber: '',
+      officialWebsite: '',
+      adoptionPortal: '',
     },
     onSubmit: async ({ value }) => {
       setIsSaving(true);
@@ -65,7 +65,7 @@ const OrgProfile: React.FC = () => {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const logoUrl = form.state.values.logo_url;
+  const logoUrl = form.state.values.logoUrl;
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -90,7 +90,7 @@ const OrgProfile: React.FC = () => {
         const { data } = supabase.storage.from('koa-attachments').getPublicUrl(filePath);
         const cacheBustedUrl = `${data.publicUrl}?t=${Date.now()}`;
 
-        form.setFieldValue('logo_url', cacheBustedUrl);
+        form.setFieldValue('logoUrl', cacheBustedUrl);
       } catch (error) {
         console.error('Upload failed', error);
         showToast('Upload failed. Ensure you have network connectivity.', 'error');
@@ -125,13 +125,13 @@ const OrgProfile: React.FC = () => {
               {isUploading && <p className="text-sm text-blue-500">Uploading...</p>}
               
               <div className="grid grid-cols-1 gap-4">
-                <form.Field name="org_name" children={(field) => (
+                <form.Field name="orgName" children={(field) => (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Academy Name</label>
                     <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />
                   </div>
                 )} />
-                <form.Field name="zla_license_number" children={(field) => (
+                <form.Field name="zlaLicenseNumber" children={(field) => (
                   <div>
                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Zoo Licence Number</label>
                     <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />
@@ -151,25 +151,25 @@ const OrgProfile: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mt-4">
-            <form.Field name="contact_email" children={(field) => (
+            <form.Field name="contactEmail" children={(field) => (
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Professional Email</label>
                 <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />
               </div>
             )} />
-            <form.Field name="contact_phone" children={(field) => (
+            <form.Field name="contactPhone" children={(field) => (
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Academy Phone</label>
                 <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />
               </div>
             )} />
-            <form.Field name="official_website" children={(field) => (
+            <form.Field name="officialWebsite" children={(field) => (
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Official Website</label>
                 <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />
               </div>
             )} />
-            <form.Field name="adoption_portal" children={(field) => (
+            <form.Field name="adoptionPortal" children={(field) => (
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Adoption Portal</label>
                 <input value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="mt-1 block w-full border border-slate-200 rounded-lg p-2.5 bg-slate-50" />

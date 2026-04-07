@@ -7,12 +7,12 @@ import { useRotaData } from './useRotaData';
 import { useUsersData } from '../settings/useUsersData';
 
 const schema = z.object({
-  user_id: z.string().min(1, 'User is required'),
+  userId: z.string().min(1, 'User is required'),
   date: z.string().min(1, 'Date is required'),
-  shift_type: z.nativeEnum(ShiftType),
-  start_time: z.string().min(1, 'Start time is required'),
-  end_time: z.string().min(1, 'End time is required'),
-  assigned_area: z.string().optional(),
+  shiftType: z.nativeEnum(ShiftType),
+  startTime: z.string().min(1, 'Start time is required'),
+  endTime: z.string().min(1, 'End time is required'),
+  assignedArea: z.string().optional(),
   repeat: z.boolean(),
   repeatDays: z.array(z.number()),
   weeks: z.number().min(1).max(52)
@@ -30,12 +30,12 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ isOpen, onClose }) => {
 
   const form = useForm({
     defaultValues: {
-      user_id: '',
+      userId: '',
       date: new Date().toISOString().split('T')[0],
-      shift_type: ShiftType.DAY,
-      start_time: '',
-      end_time: '',
-      assigned_area: '',
+      shiftType: ShiftType.DAY,
+      startTime: '',
+      endTime: '',
+      assignedArea: '',
       repeat: false,
       repeatDays: [] as number[],
       weeks: 1
@@ -45,17 +45,17 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ isOpen, onClose }) => {
       setIsSubmitting(true);
       try {
         const data = schema.parse(value);
-        const user = users.find(u => u.id === data.user_id);
+        const user = users.find(u => u.id === data.userId);
         
         const cleanShiftData = {
-          user_id: data.user_id,
+          userId: data.userId,
           date: data.date,
-          shift_type: data.shift_type,
-          start_time: data.start_time,
-          end_time: data.end_time,
-          assigned_area: data.assigned_area,
-          user_name: user?.name || 'Unknown',
-          user_role: user?.role || 'Unknown'
+          shiftType: data.shiftType,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          assignedArea: data.assignedArea,
+          userName: user?.name || 'Unknown',
+          userRole: user?.role || 'Unknown'
         };
 
         await addShift(cleanShiftData as Shift);
@@ -76,7 +76,7 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ isOpen, onClose }) => {
           <button onClick={onClose}><X /></button>
         </div>
         <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }} className="space-y-4">
-          <form.Field name="user_id" children={(field) => (
+          <form.Field name="userId" children={(field) => (
             <select value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="w-full border p-2 rounded">
               <option value="">Select User</option>
               {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
@@ -85,20 +85,20 @@ const AddShiftModal: React.FC<AddShiftModalProps> = ({ isOpen, onClose }) => {
           <form.Field name="date" children={(field) => (
             <input type="date" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="w-full border p-2 rounded" />
           )} />
-          <form.Field name="shift_type" children={(field) => (
+          <form.Field name="shiftType" children={(field) => (
             <select value={field.state.value} onChange={(e) => field.handleChange(e.target.value as ShiftType)} className="w-full border p-2 rounded">
               {Object.values(ShiftType).map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           )} />
           <div className="flex gap-2">
-            <form.Field name="start_time" children={(field) => (
+            <form.Field name="startTime" children={(field) => (
               <input type="time" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="w-full border p-2 rounded" />
             )} />
-            <form.Field name="end_time" children={(field) => (
+            <form.Field name="endTime" children={(field) => (
               <input type="time" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} className="w-full border p-2 rounded" />
             )} />
           </div>
-          <form.Field name="assigned_area" children={(field) => (
+          <form.Field name="assignedArea" children={(field) => (
             <input type="text" value={field.state.value} onChange={(e) => field.handleChange(e.target.value)} placeholder="Assigned Area" className="w-full border p-2 rounded" />
           )} />
           

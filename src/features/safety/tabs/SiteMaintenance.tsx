@@ -7,8 +7,8 @@ import { MaintenanceLog } from '../../../types';
 import { usePermissions } from '../../../hooks/usePermissions';
 
 const schema = z.object({
-  enclosure_id: z.string().min(1, 'Enclosure ID is required'),
-  task_type: z.enum(['UV Replacement', 'Structural Repair', 'General']),
+  enclosureId: z.string().min(1, 'Enclosure ID is required'),
+  taskType: z.enum(['UV Replacement', 'Structural Repair', 'General']),
   description: z.string().min(1, 'Description is required'),
   status: z.enum(['Pending', 'Completed']),
 });
@@ -24,8 +24,8 @@ const SiteMaintenance: React.FC = () => {
 
   const form = useForm({
     defaultValues: {
-      enclosure_id: '',
-      task_type: 'General' as 'UV Replacement' | 'Structural Repair' | 'General',
+      enclosureId: '',
+      taskType: 'General' as 'UV Replacement' | 'Structural Repair' | 'General',
       description: '',
       status: 'Pending' as 'Pending' | 'Completed',
     },
@@ -33,11 +33,11 @@ const SiteMaintenance: React.FC = () => {
       try {
         const data = schema.parse(value);
         const logData = {
-          enclosure_id: data.enclosure_id,
-          task_type: data.task_type,
+          enclosureId: data.enclosureId,
+          taskType: data.taskType,
           description: data.description,
           status: data.status,
-          date_logged: editingLog ? editingLog.date_logged : new Date().toISOString(),
+          dateLogged: editingLog ? editingLog.dateLogged : new Date().toISOString(),
         };
 
         if (editingLog) {
@@ -56,7 +56,7 @@ const SiteMaintenance: React.FC = () => {
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
       const matchesSearch = log.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            log.enclosure_id.toLowerCase().includes(searchTerm.toLowerCase());
+                            log.enclosureId.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesFilter = filterStatus === 'ALL' || log.status === filterStatus;
       return matchesSearch && matchesFilter;
     });
@@ -77,8 +77,8 @@ const SiteMaintenance: React.FC = () => {
   const openModal = (log?: MaintenanceLog) => {
     if (log) {
       setEditingLog(log);
-      form.setFieldValue('enclosure_id', log.enclosure_id);
-      form.setFieldValue('task_type', log.task_type);
+      form.setFieldValue('enclosureId', log.enclosureId);
+      form.setFieldValue('taskType', log.taskType);
       form.setFieldValue('description', log.description);
       form.setFieldValue('status', log.status);
     } else {
@@ -142,14 +142,14 @@ const SiteMaintenance: React.FC = () => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <span className={`px-2 py-1 rounded text-xs font-medium border bg-blue-50 text-blue-700 border-blue-200`}>
-                    {log.task_type}
+                    {log.taskType}
                   </span>
                   <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
                     {log.status === 'Completed' ? <CheckCircle2 size={16} className="text-emerald-500" /> : <AlertCircle size={16} className="text-slate-400" />} {log.status}
                   </span>
                 </div>
                 <h3 className="font-semibold text-slate-900 text-lg leading-tight group-hover:text-blue-600 transition-colors">
-                  {log.enclosure_id}
+                  {log.enclosureId}
                 </h3>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -166,7 +166,7 @@ const SiteMaintenance: React.FC = () => {
               <div className="flex items-center justify-between pt-2 text-sm text-slate-500">
                 <div className="flex items-center gap-1.5">
                   <Clock size={14} className="text-slate-400" />
-                  {new Date(log.date_logged as string).toLocaleDateString('en-GB')}
+                  {new Date(log.dateLogged as string).toLocaleDateString('en-GB')}
                 </div>
               </div>
             </div>
@@ -174,7 +174,7 @@ const SiteMaintenance: React.FC = () => {
             <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex justify-between items-center rounded-b-xl">
               {log.status !== 'Completed' && (
                 <button 
-                  onClick={() => updateLog({ ...log, status: 'Completed', date_completed: new Date().toISOString() })}
+                  onClick={() => updateLog({ ...log, status: 'Completed', dateCompleted: new Date().toISOString() })}
                   className="text-xs font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1 px-2 py-1 hover:bg-emerald-50 rounded transition-colors"
                 >
                   <CheckCircle2 size={14}/> Mark Completed
@@ -203,13 +203,13 @@ const SiteMaintenance: React.FC = () => {
             </div>
             <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }} className="p-6 space-y-4">
               <div className="space-y-4">
-                <form.Field name="enclosure_id" children={(field) => (
+                <form.Field name="enclosureId" children={(field) => (
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Enclosure ID</label>
                     <input required value={field.state.value} onChange={e => field.handleChange(e.target.value)} className={inputClass} placeholder="e.g. Lion Enclosure North"/>
                   </div>
                 )} />
-                <form.Field name="task_type" children={(field) => (
+                <form.Field name="taskType" children={(field) => (
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Task Type</label>
                     <select value={field.state.value} onChange={e => field.handleChange(e.target.value as 'UV Replacement' | 'Structural Repair' | 'General')} className={inputClass}>

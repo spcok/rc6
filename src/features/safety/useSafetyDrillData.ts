@@ -10,7 +10,7 @@ export const useSafetyDrillData = () => {
     queryKey: ['safetyDrills'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('safety_drills').select('*');
+        const { data, error } = await supabase.from('safety_drills').select('*').limit(2500);
         if (error) throw error;
         data.forEach(item => safetyDrillsCollection.update(item.id, () => item as SafetyDrill).catch(() => safetyDrillsCollection.insert(item as SafetyDrill)));
         return data as SafetyDrill[];

@@ -24,6 +24,7 @@ interface FeedFormProps {
 
 export default function FeedForm({ animal, date, userInitials, existingLog, foodTypes, onSave, onCancel }: FeedFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // UI/UX Fix
 
   const form = useForm({
     defaultValues: {
@@ -46,27 +47,29 @@ export default function FeedForm({ animal, date, userInitials, existingLog, food
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true);
+      setErrorMessage(null);
       try {
         const safePayload = feedSchema.parse(value);
         const finalValue = safePayload.feedItems.map(item => `${item.type} - ${item.quantity}`).join(', ');
         
+        // Payload Integrity Fix: Passing camelCase strictly matching LogEntry interface
         const payload: Partial<LogEntry> = {
           id: existingLog?.id || uuidv4(),
-          animal_id: animal.id,
-          log_type: LogType.FEED,
-          log_date: date,
-          user_initials: userInitials,
+          animalId: animal.id,
+          logType: LogType.FEED,
+          logDate: date,
+          userInitials: userInitials,
           value: finalValue,
           notes: JSON.stringify({ cast: safePayload.cast, feedTime: safePayload.feedTime, userNotes: safePayload.userNotes || '' })
         };
         await onSave(payload);
-        onCancel(); // Force modal to close on success
+        onCancel(); 
       } catch (err: unknown) {
         console.error("Submission Error:", err);
         if (err instanceof Error) {
-          alert(`Database Error: ${err.message}`);
+          setErrorMessage(`Database Error: ${err.message}`);
         } else {
-          alert('Failed to save log');
+          setErrorMessage('Failed to save log');
         }
       } finally {
         setIsSubmitting(false);
@@ -76,6 +79,13 @@ export default function FeedForm({ animal, date, userInitials, existingLog, food
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }} className="space-y-6">
+      
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
+          {errorMessage}
+        </div>
+      )}
+
       <form.Field name="feedItems" children={(field) => (
         <div className="space-y-4">
           <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest">Feed Items</label>

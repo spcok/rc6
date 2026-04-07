@@ -32,7 +32,7 @@ export function useDashboardData(activeTab: AnimalCategory | 'ARCHIVED', viewDat
     queryKey: ['animals'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('animals').select('*');
+        const { data, error } = await supabase.from('animals').select('*').limit(2500);
         if (error) throw error;
         const mappedData = data.map(item => mapToCamelCase<Animal>(item));
         for (const item of mappedData) {
@@ -55,7 +55,7 @@ export function useDashboardData(activeTab: AnimalCategory | 'ARCHIVED', viewDat
     queryKey: ['dailyLogs'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('daily_logs').select('*');
+        const { data, error } = await supabase.from('daily_logs').select('*').limit(2500);
         if (error) throw error;
         const mappedData = data.map(item => mapToCamelCase<DailyLog>(item));
         for (const item of mappedData) {

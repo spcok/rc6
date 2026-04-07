@@ -23,9 +23,10 @@ export const useMovementsData = () => {
     queryKey: ['movements'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('movements').select('*');
+        const { data, error } = await supabase.from('movements').select('*').limit(2500); // Phase 1 Fix
         if (error) throw error;
-        const movements: InternalMovement[] = (data as unknown as SupabaseMovement[]).map((item: SupabaseMovement) => ({
+        
+        const mappedMovements: InternalMovement[] = (data as unknown as SupabaseMovement[]).map((item: SupabaseMovement) => ({
           id: item.id,
           animalId: item.animal_id || '',
           animalName: item.animal_name || 'Unknown',
@@ -38,14 +39,10 @@ export const useMovementsData = () => {
           isDeleted: item.is_deleted || false
         }));
         
-        for (const item of movements) {
-          try {
-            await movementsCollection.update(item.id, () => item);
-          } catch {
-            await movementsCollection.insert(item);
-          }
+        for (const item of mappedMovements) {
+          await movementsCollection.update(item).catch(() => movementsCollection.insert(item)); // Phase 1 Fix
         }
-        return movements;
+        return mappedMovements;
       } catch {
         console.warn("Network unreachable. Serving movements from local vault.");
         return await movementsCollection.getAll();
@@ -61,8 +58,23 @@ export const useMovementsData = () => {
         createdAt: new Date().toISOString(),
         isDeleted: false
       } as InternalMovement;
+
+      // Payload Integrity: Map to snake_case
+      const supabasePayload = {
+        id: payload.id,
+        animal_id: payload.animalId,
+        animal_name: payload.animalName,
+        log_date: payload.logDate,
+        movement_type: payload.movementType,
+        source_location: payload.sourceLocation,
+        destination_location: payload.destinationLocation,
+        created_by: payload.createdBy,
+        created_at: payload.createdAt,
+        is_deleted: payload.isDeleted
+      };
+
       try {
-        const { error } = await supabase.from('movements').insert([payload]);
+        const { error } = await supabase.from('movements').insert([supabasePayload]);
         if (error) throw error;
       } catch {
         console.warn("Offline: Adding movement locally.");

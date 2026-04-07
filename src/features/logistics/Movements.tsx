@@ -20,7 +20,7 @@ export default function Movements() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const movementColumns = useMemo(() => [
-    movementColumnHelper.accessor('log_date', {
+    movementColumnHelper.accessor('logDate', {
       header: 'Date',
       cell: info => (
         <div className="flex items-center gap-1.5 text-slate-600 font-semibold text-sm">
@@ -29,7 +29,7 @@ export default function Movements() {
         </div>
       )
     }),
-    movementColumnHelper.accessor('animal_name', {
+    movementColumnHelper.accessor('animalName', {
       header: 'Animal',
       cell: info => (
         <div className="flex items-center gap-3">
@@ -40,7 +40,7 @@ export default function Movements() {
         </div>
       )
     }),
-    movementColumnHelper.accessor('movement_type', {
+    movementColumnHelper.accessor('movementType', {
       header: 'Type',
       cell: info => <span className="text-sm font-medium text-slate-500">{info.getValue()}</span>
     }),
@@ -53,18 +53,18 @@ export default function Movements() {
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 font-semibold text-slate-900 text-sm">
               <MapPin size={14} className="text-slate-400" />
-              {m.source_location}
+              {m.sourceLocation}
             </div>
             <ArrowRight className="text-slate-300" size={16} />
             <div className="flex items-center gap-1.5 font-semibold text-slate-900 text-sm">
               <MapPin size={14} className="text-slate-400" />
-              {m.destination_location}
+              {m.destinationLocation}
             </div>
           </div>
         );
       }
     }),
-    movementColumnHelper.accessor('created_by', {
+    movementColumnHelper.accessor('createdBy', {
       header: 'Authorized By',
       cell: info => (
         <div className="text-sm font-medium text-slate-500 flex items-center gap-1">
@@ -100,7 +100,7 @@ export default function Movements() {
         );
       }
     }),
-    transferColumnHelper.accessor('transfer_type', {
+    transferColumnHelper.accessor('transferType', {
       header: 'Type',
       cell: info => {
         const type = info.getValue();
@@ -115,7 +115,7 @@ export default function Movements() {
       header: 'Institution',
       cell: info => <span className="font-semibold text-slate-900 text-sm">{info.getValue()}</span>
     }),
-    transferColumnHelper.accessor('cites_article_10_ref', {
+    transferColumnHelper.accessor('citesArticle10Ref', {
       header: 'CITES / A10',
       cell: info => <span className="font-semibold text-slate-900 text-sm">{info.getValue() || '—'}</span>
     }),

@@ -19,7 +19,7 @@ export const useTaskData = () => {
     queryKey: ['tasks'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('tasks').select('*');
+        const { data, error } = await supabase.from('tasks').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: Task[] = data.map((item: Record<string, unknown>) => mapToCamelCase<Task>(item));

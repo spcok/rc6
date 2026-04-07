@@ -42,10 +42,10 @@ export default function Timesheets() {
           <div key={timesheet.id} className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm hover:shadow-md transition-all">
             <div className="flex items-center gap-4 w-full md:w-auto">
               <div className="w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center font-black text-xs border-2 border-white shadow-lg shrink-0">
-                {String(timesheet.staff_name).split(' ').map(n => n[0]).join('')}
+                {String(timesheet.staffName).split(' ').map(n => n[0]).join('')}
               </div>
               <div>
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">{String(timesheet.staff_name)}</h3>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">{String(timesheet.staffName)}</h3>
                 <div className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest flex items-center gap-1">
                   <Calendar size={10}/> {String(timesheet.date)}
                 </div>
@@ -56,13 +56,13 @@ export default function Timesheets() {
               <div className="flex flex-col items-center">
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Clock In</span>
                 <span className="bg-slate-50 px-3 py-1.5 rounded-lg border-2 border-slate-100 font-mono text-xs font-black text-slate-600">
-                  {String(timesheet.clock_in).includes('T') ? new Date(timesheet.clock_in as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : String(timesheet.clock_in)}
+                  {String(timesheet.clockIn).includes('T') ? new Date(timesheet.clockIn as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : String(timesheet.clockIn)}
                 </span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Clock Out</span>
                 <span className={`px-3 py-1.5 rounded-lg border-2 font-mono text-xs font-black ${timesheet.status === TimesheetStatus.ACTIVE ? 'bg-amber-50 border-amber-100 text-amber-600 italic' : 'bg-slate-50 border-slate-100 text-slate-600'}`}>
-                  {timesheet.clock_out ? (String(timesheet.clock_out).includes('T') ? new Date(timesheet.clock_out as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : String(timesheet.clock_out)) : '--:--'}
+                  {timesheet.clockOut ? (String(timesheet.clockOut).includes('T') ? new Date(timesheet.clockOut as string).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : String(timesheet.clockOut)) : '--:--'}
                 </span>
               </div>
             </div>

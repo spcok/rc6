@@ -35,6 +35,7 @@ const archiveSchema = z.object({
 
 export const ArchiveAnimalModal: React.FC<Props> = ({ isOpen, onClose, animal }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // UI/UX Fix: Local Error State
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -51,6 +52,7 @@ export const ArchiveAnimalModal: React.FC<Props> = ({ isOpen, onClose, animal })
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true);
+      setErrorMessage(null);
       try {
         const safePayload = archiveSchema.parse(value);
         const reason = Object.entries(safePayload)
@@ -85,8 +87,8 @@ export const ArchiveAnimalModal: React.FC<Props> = ({ isOpen, onClose, animal })
         onClose();
       } catch (err: unknown) {
         console.error('Archive error:', err);
-        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
-        window.alert(`Failed to archive animal: ${errorMessage}`);
+        const msg = err instanceof Error ? err.message : 'An unknown error occurred';
+        setErrorMessage(`Failed to archive animal: ${msg}`); // UI/UX Fix: No blocking alerts
       } finally {
         setIsSubmitting(false);
       }
@@ -99,6 +101,11 @@ export const ArchiveAnimalModal: React.FC<Props> = ({ isOpen, onClose, animal })
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-lg font-bold mb-4">Archive {animal.name}</h2>
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-lg text-sm font-medium">
+            {errorMessage}
+          </div>
+        )}
         <form onSubmit={(e) => { e.preventDefault(); e.stopPropagation(); form.handleSubmit(); }}>
           <form.Field name="archiveType" children={(field) => (
             <select className="w-full mb-4 p-2 border rounded" onChange={(e) => field.handleChange(e.target.value)} value={field.state.value}>
@@ -150,10 +157,10 @@ export const ArchiveAnimalModal: React.FC<Props> = ({ isOpen, onClose, animal })
           )} />
           
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-200 rounded" disabled={isSubmitting}>Cancel</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-slate-200 rounded font-medium" disabled={isSubmitting}>Cancel</button>
             <form.Subscribe selector={(state) => state.values.archiveType} children={(archiveType) => (
-              <button type="submit" disabled={!archiveType || isSubmitting} className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50">
-                {isSubmitting ? 'Archiving...' : 'Submit'}
+              <button type="submit" disabled={!archiveType || isSubmitting} className="px-4 py-2 bg-red-600 text-white rounded font-medium disabled:opacity-50">
+                {isSubmitting ? 'Archiving...' : 'Confirm'}
               </button>
             )} />
           </div>

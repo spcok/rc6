@@ -38,16 +38,24 @@ export function useMissingRecordsData() {
     queryKey: ['animals'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('animals').select('*');
+        const { data, error } = await supabase.from('animals').select('*').limit(2500); // Phase 1 Fix
         if (error) throw error;
-        for (const item of data) {
-          try {
-            await animalsCollection.update(item as Animal);
-          } catch {
-            await animalsCollection.insert(item as Animal);
-          }
+        
+        // Anti-Corruption Layer
+        const mappedAnimals = data.map((item: any) => ({
+          ...item,
+          isDeleted: item.is_deleted,
+          microchipId: item.microchip_id,
+          acquisitionDate: item.acquisition_date,
+          latinName: item.latin_name,
+          ringNumber: item.ring_number,
+          redListStatus: item.red_list_status
+        })) as Animal[];
+
+        for (const item of mappedAnimals) {
+          await animalsCollection.update(item).catch(() => animalsCollection.insert(item)); // Phase 1 Fix
         }
-        return data as Animal[];
+        return mappedAnimals;
       } catch {
         console.warn("Network unreachable. Serving animals from local vault.");
         return await animalsCollection.getAll();
@@ -59,16 +67,22 @@ export function useMissingRecordsData() {
     queryKey: ['dailyLogs'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('daily_logs').select('*');
+        const { data, error } = await supabase.from('daily_logs').select('*').limit(5000); // Phase 1 Fix
         if (error) throw error;
-        for (const item of data) {
-          try {
-            await dailyLogsCollection.update(item as DailyLog);
-          } catch {
-            await dailyLogsCollection.insert(item as DailyLog);
-          }
+        
+        // Anti-Corruption Layer
+        const mappedLogs = data.map((item: any) => ({
+          ...item,
+          isDeleted: item.is_deleted,
+          logDate: item.log_date,
+          logType: item.log_type,
+          animalId: item.animal_id
+        })) as DailyLog[];
+
+        for (const item of mappedLogs) {
+          await dailyLogsCollection.update(item).catch(() => dailyLogsCollection.insert(item)); // Phase 1 Fix
         }
-        return data as DailyLog[];
+        return mappedLogs;
       } catch {
         console.warn("Network unreachable. Serving daily logs from local vault.");
         return await dailyLogsCollection.getAll();
@@ -80,16 +94,22 @@ export function useMissingRecordsData() {
     queryKey: ['medicalLogs'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('medical_logs').select('*');
+        const { data, error } = await supabase.from('medical_logs').select('*').limit(2500); // Phase 1 Fix
         if (error) throw error;
-        for (const item of data) {
-          try {
-            await medicalLogsCollection.update(item as ClinicalNote);
-          } catch {
-            await medicalLogsCollection.insert(item as ClinicalNote);
-          }
+        
+        // Anti-Corruption Layer
+        const mappedNotes = data.map((item: any) => ({
+          ...item,
+          isDeleted: item.is_deleted,
+          animalId: item.animal_id,
+          noteType: item.note_type,
+          date: item.log_date
+        })) as ClinicalNote[];
+
+        for (const item of mappedNotes) {
+          await medicalLogsCollection.update(item).catch(() => medicalLogsCollection.insert(item)); // Phase 1 Fix
         }
-        return data as ClinicalNote[];
+        return mappedNotes;
       } catch {
         console.warn("Network unreachable. Serving medical logs from local vault.");
         return await medicalLogsCollection.getAll();
@@ -100,7 +120,8 @@ export function useMissingRecordsData() {
   const isLoading = isLoadingAnimals || isLoadingDailyLogs || isLoadingMedicalLogs;
 
   const { alerts, complianceStats, categoryCompliance, husbandryStatus } = useMemo(() => {
-    const activeAnimals = animals.filter(a => !a.is_deleted && !a.archived);
+    // Anti-Corruption Layer Fix: Using camelCase UI logic
+    const activeAnimals = animals.filter(a => !a.isDeleted && !a.archived);
     if (!activeAnimals.length) return { alerts: [], complianceStats: [], categoryCompliance: {}, husbandryStatus: [] };
     
     const allAlerts: MissingRecordAlert[] = [];
@@ -128,7 +149,7 @@ export function useMissingRecordsData() {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
-        const dayLogs = animalLogs.filter(log => log.logDate.startsWith(dateStr));
+        const dayLogs = animalLogs.filter(log => log.logDate?.startsWith(dateStr));
         weightsPresent[i] = dayLogs.some(l => l.logType === LogType.WEIGHT);
         feedsPresent[i] = dayLogs.some(l => l.logType === LogType.FEED);
       }
@@ -137,7 +158,7 @@ export function useMissingRecordsData() {
       // Health Scoring
       const animalMedicalLogs = medicalLogs.filter(l => l.animalId === animal.id);
       const checkupLogs = animalMedicalLogs
-        .filter(log => log.noteType.toLowerCase().includes('checkup') || log.noteType.toLowerCase().includes('medical'))
+        .filter(log => log.noteType?.toLowerCase().includes('checkup') || log.noteType?.toLowerCase().includes('medical'))
         .sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
       
       const latestCheckup = checkupLogs[0];
@@ -188,7 +209,7 @@ export function useMissingRecordsData() {
           category: 'Husbandry'
         });
       } else {
-        const lastDate = new Date(latestWeight.log_date as string);
+        const lastDate = new Date(latestWeight.logDate as string);
         const diffDays = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays > weightThreshold) {
           allAlerts.push({
@@ -224,7 +245,7 @@ export function useMissingRecordsData() {
           category: 'Husbandry'
         });
       } else {
-        const lastDate = new Date(latestFeed.log_date as string);
+        const lastDate = new Date(latestFeed.logDate as string);
         const diffDays = Math.floor((now.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24));
         if (diffDays > feedThreshold) {
           allAlerts.push({
@@ -304,7 +325,7 @@ export function useMissingRecordsData() {
         const date = new Date(now);
         date.setDate(date.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
-        const dayLogs = animalLogs.filter(log => log.logDate.startsWith(dateStr));
+        const dayLogs = animalLogs.filter(log => log.logDate?.startsWith(dateStr));
         weights[i] = dayLogs.some(l => l.logType === LogType.WEIGHT);
         feeds[i] = dayLogs.some(l => l.logType === LogType.FEED);
       }
@@ -336,4 +357,3 @@ export function useMissingRecordsData() {
     isLoading
   };
 }
-

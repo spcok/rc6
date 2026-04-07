@@ -11,7 +11,7 @@ export function useFirstAidData() {
     queryKey: ['firstAid'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('first_aid').select('*');
+        const { data, error } = await supabase.from('first_aid').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: FirstAidLog[] = data.map((item: Record<string, unknown>) => mapToCamelCase<FirstAidLog>(item));

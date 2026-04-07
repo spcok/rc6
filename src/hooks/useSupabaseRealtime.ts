@@ -15,25 +15,32 @@ export const useSupabaseRealtime = () => {
           console.log('Realtime change received:', payload);
           const table = payload.table;
           
-          // Invalidate relevant queries based on the table
-          if (table === 'animals') {
-            queryClient.invalidateQueries({ queryKey: ['animals'] });
-            queryClient.invalidateQueries({ queryKey: ['animal'] });
-          } else if (table === 'daily_logs') {
-            queryClient.invalidateQueries({ queryKey: ['dailyLogs'] });
-          } else if (table === 'tasks') {
-            queryClient.invalidateQueries({ queryKey: ['tasks'] });
-          } else if (table === 'clinical_notes') {
-            queryClient.invalidateQueries({ queryKey: ['clinicalNotes'] });
-          } else if (table === 'mar_charts') {
-            queryClient.invalidateQueries({ queryKey: ['marCharts'] });
-          } else if (table === 'quarantine_records') {
-            queryClient.invalidateQueries({ queryKey: ['quarantineRecords'] });
-          } else if (table === 'timesheets') {
-            queryClient.invalidateQueries({ queryKey: ['timesheets'] });
+          // Phase 3 Fix: Explicit routing only. No blanket invalidations.
+          const routeMap: Record<string, string[]> = {
+            'animals': ['animals', 'animal'],
+            'daily_logs': ['dailyLogs'],
+            'tasks': ['tasks'],
+            'clinical_notes': ['clinical_notes'],
+            'mar_charts': ['mar_charts'],
+            'quarantine_records': ['quarantine_records'],
+            'timesheets': ['timesheets'],
+            'movements': ['movements'],
+            'transfers': ['transfers'],
+            'maintenance': ['maintenance'],
+            'safety_drills': ['safetyDrills'],
+            'incidents': ['incidents'],
+            'first_aid': ['firstAid'],
+            'users': ['users'],
+            'role_permissions': ['role_permissions']
+          };
+
+          const keysToInvalidate = routeMap[table];
+          if (keysToInvalidate) {
+            keysToInvalidate.forEach(key => {
+              queryClient.invalidateQueries({ queryKey: [key] });
+            });
           } else {
-            // Fallback: invalidate everything if we're not sure
-            queryClient.invalidateQueries();
+             console.warn(`No cache route mapped for table: ${table}. Ignoring realtime event to prevent cache thrashing.`);
           }
         }
       )

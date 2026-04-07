@@ -9,7 +9,7 @@ import { ProfileActionBar } from './ProfileActionBar';
 import HusbandryLogs from '../husbandry/HusbandryLogs';
 import { formatWeightDisplay } from '../../services/weightUtils';
 
-const SignGenerator = React.lazy(() => import('./SignGenerator'));
+const SignGenerator = React.lazy(() => import('../../hooks/SignGenerator'));
 
 export interface Props {
   animalId?: string;

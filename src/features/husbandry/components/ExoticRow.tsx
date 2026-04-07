@@ -10,7 +10,7 @@ interface ExoticRowProps {
 }
 
 export const ExoticRow: React.FC<ExoticRowProps> = memo(({ animal, getTodayLog, onCellClick, parentMobName }) => {
-  const isGroup = animal.entity_type === EntityType.GROUP;
+  const isGroup = animal.entityType === EntityType.GROUP;
   const feedLog = getTodayLog(animal.id, LogType.FEED);
   const mistingLog = getTodayLog(animal.id, LogType.MISTING);
   const tempLog = getTodayLog(animal.id, LogType.TEMPERATURE);
@@ -29,18 +29,18 @@ export const ExoticRow: React.FC<ExoticRowProps> = memo(({ animal, getTodayLog, 
   return (
     <tr className="border-b border-slate-100 hover:bg-slate-50">
       <td className="px-1 py-3 sm:p-4 flex items-center gap-1 sm:gap-3">
-        <img src={animal.image_url || '/placeholder.png'} alt={animal.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
+        <img src={animal.imageUrl || '/placeholder.png'} alt={animal.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
         <div className="min-w-0">
           <div className="font-bold text-slate-800 text-xs sm:text-sm break-words flex items-center flex-wrap gap-1">
             {animal.name}
             {isGroup && (
               <span className="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full whitespace-nowrap">
-                Group Record (Census: {animal.census_count || 0})
+                Group Record (Census: {animal.censusCount || 0})
               </span>
             )}
           </div>
           <div className="text-[10px] sm:text-xs text-slate-500 break-words">{animal.species}</div>
-          {animal.entity_type === EntityType.INDIVIDUAL && animal.parent_mob_id && parentMobName && (
+          {animal.entityType === EntityType.INDIVIDUAL && animal.parentMobId && parentMobName && (
             <div className="text-[10px] text-slate-500 italic">Part of {parentMobName}</div>
           )}
         </div>

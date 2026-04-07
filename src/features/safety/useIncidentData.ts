@@ -10,7 +10,7 @@ export const useIncidentData = () => {
     queryKey: ['incidents'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('incidents').select('*');
+        const { data, error } = await supabase.from('incidents').select('*').limit(2500);
         if (error) throw error;
         data.forEach(item => incidentsCollection.update(item.id, () => item as Incident).catch(() => incidentsCollection.insert(item as Incident)));
         return data as Incident[];

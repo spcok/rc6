@@ -74,8 +74,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, initialD
           initials: data.initials.toUpperCase(),
           pin: data.pin,
           password: data.password || undefined,
-          signature_data: currentSignature,
-          integrity_seal: integritySeal
+          signatureData: currentSignature,
+          integritySeal: integritySeal
         };
 
         if (initialData && onSave) {
@@ -83,8 +83,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, initialD
           try {
             await onSave(cleanData);
           } catch (err: unknown) {
-            if (err instanceof Error && err.message?.includes('integrity_seal')) {
-              console.error('⚠️ [SCHEMA] Missing integrity_seal column.');
+            if (err instanceof Error && err.message?.includes('integritySeal')) {
+              console.error('⚠️ [SCHEMA] Missing integritySeal column.');
             }
             throw err;
           }
@@ -99,8 +99,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, initialD
             role: cleanData.role,
             initials: cleanData.initials,
             pin: cleanData.pin,
-            signature_data: cleanData.signature_data,
-            integrity_seal: cleanData.integrity_seal
+            signatureData: cleanData.signatureData,
+            integritySeal: cleanData.integritySeal
           };
 
           if (onAdd) {
@@ -139,7 +139,7 @@ const UserFormModal: React.FC<UserFormModalProps> = ({ isOpen, onClose, initialD
         pin: initialData.pin,
         password: '',
       });
-      setCurrentSignature(initialData.signature_data);
+      setCurrentSignature(initialData.signatureData);
     } else {
       form.reset({ name: '', email: '', role: UserRole.VOLUNTEER, initials: '', password: '', pin: '' });
       setCurrentSignature(undefined);

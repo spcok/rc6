@@ -157,7 +157,7 @@ const FeedingSchedule: React.FC = () => {
       const groups = new Map<string, { animal: Animal, tasks: Task[] }>();
       
       filteredTasks.forEach(task => {
-          const aId = task.animal_id;
+          const aId = task.animalId;
           if (!aId) return;
           if (!groups.has(aId)) {
               const animal = animals.find(a => a.id === aId);
@@ -401,11 +401,11 @@ const FeedingSchedule: React.FC = () => {
                             viewLayout === 'timeline' ? (
                                 <div className="space-y-2">
                                     {filteredTasks.map(task => {
-                                        const animal = animals.find(a => a.id === (task.animal_id));
+                                        const animal = animals.find(a => a.id === (task.animalId));
                                         if (!animal) return null;
                                         
-                                        const dateObj = new Date(task.due_date as string);
-                                        const isToday = (task.due_date) === getUKLocalDate();
+                                        const dateObj = new Date(task.dueDate as string);
+                                        const isToday = (task.dueDate) === getUKLocalDate();
 
                                         return (
                                             <div key={task.id} className={`flex items-center bg-white border border-slate-200 rounded-lg p-2.5 hover:bg-slate-50 transition-colors group ${task.completed ? 'opacity-60' : ''}`}>

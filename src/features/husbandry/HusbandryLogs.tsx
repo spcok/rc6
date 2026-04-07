@@ -25,6 +25,7 @@ const HusbandryLogs: React.FC<HusbandryLogsProps> = ({ animalId, weightUnit = 'g
     deleteLogEntry
   } = useDailyLogData('all', 'all', effectiveAnimalId);
   
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [filter, setFilter] = useState('ALL');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<LogEntry | undefined>(undefined);
@@ -47,11 +48,13 @@ const HusbandryLogs: React.FC<HusbandryLogsProps> = ({ animalId, weightUnit = 'g
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const virtualizer = useVirtualizer({
+  const virtualizerConfig = useMemo(() => ({
     count: filteredLogs.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 56,
-  });
+  }), [filteredLogs.length]);
+
+  const virtualizer = useVirtualizer(virtualizerConfig);
 
   const renderLogValue = useCallback((log: LogEntry) => {
     if (log.logType?.toUpperCase() === 'WEIGHT') {
@@ -86,11 +89,7 @@ const HusbandryLogs: React.FC<HusbandryLogsProps> = ({ animalId, weightUnit = 'g
       setSelectedLog(undefined);
     } catch (err: unknown) {
       console.error('Failed to save log:', err);
-      if (err instanceof Error) {
-        alert(`Database Error: ${err.message}`);
-      } else {
-        alert('Failed to save log');
-      }
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to save log');
     }
   };
 
@@ -100,16 +99,18 @@ const HusbandryLogs: React.FC<HusbandryLogsProps> = ({ animalId, weightUnit = 'g
       await deleteLogEntry(id);
     } catch (err: unknown) {
       console.error('Failed to delete log:', err);
-      if (err instanceof Error) {
-        alert(`Delete Error: ${err.message}`);
-      } else {
-        alert('Failed to delete log');
-      }
+      setErrorMessage(err instanceof Error ? err.message : 'Failed to delete log');
     }
   };
 
   return (
     <div className="space-y-4 relative">
+      {errorMessage && (
+        <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center justify-between">
+          <span>{errorMessage}</span>
+          <button onClick={() => setErrorMessage(null)} className="text-rose-500 hover:text-rose-700">✕</button>
+        </div>
+      )}
       <div className="flex gap-2 flex-wrap">
         {filters.map(f => (
           <button 

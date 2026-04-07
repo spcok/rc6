@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -20,7 +20,7 @@ interface DataTableProps<TData, TValue = unknown> {
 export function DataTable<TData, TValue = unknown>({
   columns,
   data,
-  pageSize = 10000, // Set to a large number to virtualize all data
+  pageSize = 10000, 
   searchPlaceholder = "Search records...",
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState('');
@@ -45,13 +45,17 @@ export function DataTable<TData, TValue = unknown>({
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rows = table.getRowModel().rows;
+  const rowCount = rows.length;
 
-  const virtualizer = useVirtualizer({
-    count: rows.length,
+  // Phase 3 Fix: Stabilized config for React 19 to prevent layout thrashing
+  const virtualizerConfig = useMemo(() => ({
+    count: rowCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 45,
-  });
+    overscan: 5,
+  }), [rowCount]);
 
+  const virtualizer = useVirtualizer(virtualizerConfig);
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
@@ -130,10 +134,9 @@ export function DataTable<TData, TValue = unknown>({
         </table>
       </div>
 
-      {/* Pagination Controls */}
       <div className="flex items-center justify-between px-2">
         <div className="text-xs text-slate-500 font-medium">
-          Showing {rows.length} records
+          Showing {rowCount} records
         </div>
       </div>
     </div>

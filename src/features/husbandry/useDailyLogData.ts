@@ -16,7 +16,7 @@ export const useDailyLogData = (_viewDate: string, activeCategory: AnimalCategor
     queryKey: ['dailyLogs'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('daily_logs').select('*');
+        const { data, error } = await supabase.from('daily_logs').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: LogEntry[] = data.map((item: Record<string, unknown>) => mapToCamelCase<LogEntry>(item));

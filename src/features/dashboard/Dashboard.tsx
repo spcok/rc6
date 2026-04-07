@@ -211,7 +211,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* Viewing Options Control Bar */}
       <div className="flex flex-col gap-2 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-        {/* Row 1: Date Controls */}
         <div className="flex flex-wrap items-center justify-center gap-3 w-full">
           <div className="flex items-center gap-1.5 text-slate-700 font-medium whitespace-nowrap text-[10px] lg:text-xs">
             <Calendar size={16} className="text-blue-600" />
@@ -228,7 +227,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
         
-        {/* Row 2: Sort, Lock, Add */}
         <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
             <button onClick={cycleSort} className="flex items-center justify-center gap-1.5 px-3 py-1.5 border border-slate-200 rounded-lg text-[10px] lg:text-xs font-medium hover:bg-slate-50 text-slate-700 bg-white min-w-[80px]">
               <ArrowUpDown size={14} /> {sortOption === 'alpha-asc' ? 'A-Z' : sortOption === 'alpha-desc' ? 'Z-A' : 'Custom'}
@@ -243,7 +241,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           )}
         </div>
       </div>
-
 
       {/* Tabs */}
       <div className="flex overflow-x-auto scrollbar-hide bg-slate-100 p-1 rounded-xl gap-0.5 sm:gap-1">
@@ -275,28 +272,28 @@ const Dashboard: React.FC<DashboardProps> = ({
         <h2 className="text-lg lg:text-2xl font-semibold text-slate-800">Your {activeTab ? (activeTab.charAt(0) + activeTab.slice(1).toLowerCase()) : 'Animals'}</h2>
       </div>
 
-      {/* Table */}
+      {/* Table (Removed hidden masking classes) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="w-full overflow-x-auto overflow-y-hidden">
           <table className="w-full text-left text-sm">
             <thead className="bg-white border-b border-slate-200 text-slate-600 font-medium">
               <tr>
-                <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-normal break-words min-w-[90px] max-w-[140px] md:max-w-[250px] leading-tight">Name</th>
-                <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap hidden xl:table-cell">Species</th>
-                <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap hidden 2xl:table-cell">Ring/Microchip</th>
+                <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap min-w-[120px]">Name</th>
+                <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Species</th>
+                <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Ring/Microchip</th>
                 {activeTab === 'ARCHIVED' ? (
                     <>
-                        <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Status</th>
-                        <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Date Archived</th>
-                        <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Reason</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Status</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Date Archived</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Reason</th>
                     </>
                 ) : (
                     <>
-                        <th className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : ''}`}>Today's Weight</th>
-                        <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Today's Feed</th>
-                        <th className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-normal leading-tight ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : (activeTab === AnimalCategory.OWLS || activeTab === AnimalCategory.RAPTORS ? '' : 'hidden md:table-cell')}`}>Last Fed</th>
-                        <th className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? '' : 'hidden'}`}>Next Feed</th>
-                        <th className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap hidden md:table-cell">Location</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Today's Weight</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Today's Feed</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Last Fed</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Next Feed</th>
+                        <th className="px-2 py-3 lg:px-4 lg:py-4 text-[11px] md:text-xs whitespace-nowrap">Location</th>
                     </>
                 )}
               </tr>
@@ -341,28 +338,28 @@ const Dashboard: React.FC<DashboardProps> = ({
                     animals.forEach(animal => {
                       rows.push(
                         <tr key={animal.id} className="hover:bg-slate-50 transition-colors cursor-pointer bg-slate-50/30" onClick={() => onSelectAnimal(animal)}>
-                          <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-sm md:text-base font-bold text-slate-900 whitespace-normal break-words min-w-[90px] max-w-[140px] md:max-w-[250px] leading-tight pl-4 md:pl-8">
+                          <td className="px-2 py-3 lg:px-4 lg:py-4 text-sm md:text-base font-bold text-slate-900 whitespace-nowrap min-w-[120px] pl-4 md:pl-8">
                             <span className="text-slate-300 mr-2">↳</span>
                             {animal.name}
                           </td>
-                          <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap hidden xl:table-cell">{animal.species}</td>
-                          <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap hidden 2xl:table-cell">{animal.displayId}</td>
+                          <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap">{animal.species}</td>
+                          <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">{animal.displayId}</td>
                           {activeTab === 'ARCHIVED' ? (
                               <>
-                                  <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.dispositionStatus}</td>
-                                  <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.archivedAt ? new Date(animal.archivedAt).toLocaleDateString('en-GB') : '-'}</td>
-                                  <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-normal">{animal.archiveReason}</td>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.dispositionStatus}</td>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.archivedAt ? new Date(animal.archivedAt).toLocaleDateString('en-GB') : '-'}</td>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-normal min-w-[150px]">{animal.archiveReason}</td>
                               </>
                           ) : (
                               <>
-                                  <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : ''}`}>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">
                                   {animal.todayWeight ? getWeightDisplay(animal.todayWeight, animal.weightUnit) : '-'}
                                   </td>
-                                  <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">
                                   {animal.todayFeed ? (typeof animal.todayFeed.value === 'string' ? animal.todayFeed.value : String(animal.todayFeed.value || 'Fed')) : '-'}
                                   </td>
-                                  <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-normal leading-tight min-w-[60px] ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : (activeTab === AnimalCategory.OWLS || activeTab === AnimalCategory.RAPTORS ? '' : 'hidden md:table-cell')}`}>{animal.lastFedStr}</td>
-                                  <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-normal min-w-[90px] ${activeTab === AnimalCategory.EXOTICS ? '' : 'hidden'}`}>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">{animal.lastFedStr}</td>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap min-w-[120px]">
                                   {animal.nextFeedTask ? (
                                       <div className="flex flex-col gap-0.5">
                                       <span className="font-bold text-slate-800 text-xs uppercase tracking-tight">
@@ -376,7 +373,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                       <span className="text-slate-300">-</span>
                                   )}
                                   </td>
-                                  <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-blue-500 whitespace-nowrap hidden md:table-cell">{animal.location}</td>
+                                  <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-blue-500 whitespace-nowrap">{animal.location}</td>
                               </>
                           )}
                         </tr>
@@ -385,31 +382,31 @@ const Dashboard: React.FC<DashboardProps> = ({
                   }
                 });
 
-                // Render standalone animals (excluding those that are parent mobs)
+                // Render standalone animals
                 standalone.filter(a => !grouped.has(a.id)).forEach(animal => {
                   rows.push(
                     <tr key={animal.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => onSelectAnimal(animal)}>
-                      <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-sm md:text-base font-bold text-slate-900 whitespace-normal break-words min-w-[90px] max-w-[140px] md:max-w-[250px] leading-tight">
+                      <td className="px-2 py-3 lg:px-4 lg:py-4 text-sm md:text-base font-bold text-slate-900 whitespace-nowrap min-w-[120px]">
                         {animal.name}
                       </td>
-                      <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap hidden xl:table-cell">{animal.species}</td>
-                      <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap hidden 2xl:table-cell">{animal.displayId}</td>
+                      <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap">{animal.species}</td>
+                      <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">{animal.displayId}</td>
                       {activeTab === 'ARCHIVED' ? (
                           <>
-                              <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.dispositionStatus}</td>
-                              <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.archivedAt ? new Date(animal.archivedAt).toLocaleDateString('en-GB') : '-'}</td>
-                              <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-normal">{animal.archiveReason}</td>
+                              <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.dispositionStatus}</td>
+                              <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-nowrap">{animal.archivedAt ? new Date(animal.archivedAt).toLocaleDateString('en-GB') : '-'}</td>
+                              <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-600 whitespace-normal min-w-[150px]">{animal.archiveReason}</td>
                           </>
                       ) : (
                           <>
-                              <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : ''}`}>
+                              <td className={`px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : ''}`}>
                               {animal.todayWeight ? getWeightDisplay(animal.todayWeight, animal.weight_unit) : '-'}
                               </td>
-                              <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">
+                              <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap">
                               {animal.todayFeed ? (typeof animal.todayFeed.value === 'string' ? animal.todayFeed.value : String(animal.todayFeed.value || 'Fed')) : '-'}
                               </td>
-                              <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-normal leading-tight min-w-[60px] ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : (activeTab === AnimalCategory.OWLS || activeTab === AnimalCategory.RAPTORS ? '' : 'hidden md:table-cell')}`}>{animal.lastFedStr}</td>
-                              <td className={`px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-normal min-w-[90px] ${activeTab === AnimalCategory.EXOTICS ? '' : 'hidden'}`}>
+                              <td className={`px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-400 whitespace-nowrap ${activeTab === AnimalCategory.EXOTICS ? 'hidden' : ''}`}>{animal.lastFedStr}</td>
+                              <td className={`px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-slate-500 whitespace-nowrap min-w-[120px] ${activeTab === AnimalCategory.EXOTICS ? '' : 'hidden'}`}>
                               {animal.nextFeedTask ? (
                                   <div className="flex flex-col gap-0.5">
                                   <span className="font-bold text-slate-800 text-xs uppercase tracking-tight">
@@ -423,7 +420,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                                   <span className="text-slate-300">-</span>
                               )}
                               </td>
-                              <td className="px-1 py-2 md:px-2 md:py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-blue-500 whitespace-nowrap hidden md:table-cell">{animal.location}</td>
+                              <td className="px-2 py-3 lg:px-4 lg:py-4 text-xs md:text-sm text-blue-500 whitespace-nowrap">{animal.location}</td>
                           </>
                       )}
                     </tr>

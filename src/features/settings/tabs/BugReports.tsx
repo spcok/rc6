@@ -70,14 +70,18 @@ const BugReports: React.FC = () => {
   };
 
   const handleResolve = async (id: string) => {
-    if (!isOnline) return alert("Must be online to resolve bugs.");
+    if (!isOnline) {
+      console.error("Must be online to resolve bugs.");
+      // TODO: Implement non-blocking toast notification
+      return;
+    }
     try {
       const { error } = await supabase.from('bug_reports').delete().eq('id', id);
       if (error) throw error;
       setReports(prev => prev.filter(r => r.id !== id));
     } catch (err) {
       console.error('Error resolving bug report:', err);
-      alert('Failed to resolve report. Please try again.');
+      // TODO: Implement non-blocking toast notification
     }
   };
 

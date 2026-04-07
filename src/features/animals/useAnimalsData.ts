@@ -11,7 +11,7 @@ export const useAnimalsData = () => {
     queryKey: ['animals'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('animals').select('*');
+        const { data, error } = await supabase.from('animals').select('*').limit(2500);
         if (error) throw error;
 
         const mappedData: Animal[] = data.map((item: Record<string, unknown>) => mapToCamelCase<Animal>(item));

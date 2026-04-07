@@ -40,11 +40,13 @@ const MedicalRecords: React.FC<MedicalRecordsProps> = ({ animalId, variant = 'fu
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const virtualizer = useVirtualizer({
+  const virtualizerConfig = useMemo(() => ({
     count: filteredNotes.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 100,
-  });
+  }), [filteredNotes.length]);
+
+  const virtualizer = useVirtualizer(virtualizerConfig);
 
   const marColumns = useMemo(() => [
     marColumnHelper.accessor('medication', {
@@ -354,10 +356,10 @@ const MedicalRecords: React.FC<MedicalRecordsProps> = ({ animalId, variant = 'fu
                             if (navigator.onLine) {
                               window.open(selectedNote.attachmentUrl, '_blank');
                             } else {
-                              alert('Internet connection required to view high-res image.');
+                              setErrorMessage('Internet connection required to view high-res image.');
                             }
                           } else if (selectedNote.attachmentUrl?.startsWith('local://')) {
-                            alert('High-res image is still uploading.');
+                            setErrorMessage('High-res image is still uploading.');
                           }
                         }}
                       >

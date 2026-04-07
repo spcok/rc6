@@ -19,7 +19,7 @@ export function useTimesheetData() {
     queryFn: async () => {
       try {
         // 1. ONLINE FIRST
-        const { data, error } = await supabase.from('timesheets').select('*');
+        const { data, error } = await supabase.from('timesheets').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: Timesheet[] = data.map((item: Record<string, unknown>) => ({

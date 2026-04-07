@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Animal } from '../../types';
@@ -6,32 +6,35 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { useAnimalsData } from './useAnimalsData';
 import { useArchivedAnimalsData } from './useArchivedAnimalsData';
 
-// 🚨 1. Removed the 'export' keyword and props from here
 const AnimalsList = () => {
   const [activeTab, setActiveTab] = useState<'live' | 'archived'>('live');
   
   const permissions = usePermissions();
   const navigate = useNavigate();
   
-  // 🚨 2. Fetching the live animals directly inside the component
   const { animals } = useAnimalsData(); 
   const { archivedAnimals } = useArchivedAnimalsData();
 
   const canViewArchived = permissions.isAdmin || permissions.isOwner;
 
-  // 🚨 3. Handling the click routing natively
   const handleSelectAnimal = (animal: Animal) => {
     navigate({ to: '/animals/$id', params: { id: animal.id } });
   };
 
   const parentRef = useRef<HTMLDivElement>(null);
   const currentAnimals = activeTab === 'live' ? animals : archivedAnimals;
+  const currentCount = currentAnimals.length;
 
-  const virtualizer = useVirtualizer({
-    count: currentAnimals.length,
+  // Phase 3 Fix: Stabilize Virtualizer configuration
+  const virtualizerConfig = useMemo(() => ({
+    count: currentCount,
     getScrollElement: () => parentRef.current,
     estimateSize: () => activeTab === 'live' ? 57 : 89,
-  });
+    overscan: 5,
+  }), [currentCount, activeTab]);
+
+  const virtualizer = useVirtualizer(virtualizerConfig);
+  const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <div className="space-y-6">
@@ -64,13 +67,13 @@ const AnimalsList = () => {
       )}
 
       <div ref={parentRef} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-auto h-[600px] relative">
-        {currentAnimals.length === 0 ? (
+        {currentCount === 0 ? (
           <div className="p-8 text-center text-slate-500">
             {activeTab === 'live' ? 'No live animals found.' : 'No archived records found.'}
           </div>
         ) : (
           <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
-            {virtualizer.getVirtualItems().map((virtualRow) => {
+            {virtualItems.map((virtualRow) => {
               const animal = currentAnimals[virtualRow.index];
               return (
                 <div
@@ -126,5 +129,4 @@ const AnimalsList = () => {
   );
 };
 
-// 🚨 4. Providing the required default export
 export default AnimalsList;

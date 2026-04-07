@@ -12,8 +12,8 @@ export const SignatureCapture: React.FC<SignatureCaptureProps> = ({ recordId, on
   const signatureRef = useRef<SignatureCanvas>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null); // UI/UX Fix: Local Error State
 
-  // Measure the container exactly so the pointer coordinates align perfectly with the screen
   useEffect(() => {
     const updateDimensions = () => {
       if (wrapperRef.current) {
@@ -29,7 +29,6 @@ export const SignatureCapture: React.FC<SignatureCaptureProps> = ({ recordId, on
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Load initial signature if provided and dimensions are ready
   useEffect(() => {
     if (initialSignature && signatureRef.current && dimensions.width > 0) {
       signatureRef.current.fromDataURL(initialSignature);
@@ -37,10 +36,11 @@ export const SignatureCapture: React.FC<SignatureCaptureProps> = ({ recordId, on
   }, [initialSignature, dimensions.width]);
 
   const handleSave = async () => {
+    setErrorMessage(null);
     if (signatureRef.current && !signatureRef.current.isEmpty()) {
       if (!window.crypto || !window.crypto.subtle) {
         console.warn('🛠️ [Medical QA] window.crypto.subtle is unavailable.');
-        alert("Secure connection required for legally binding signatures.");
+        setErrorMessage("Secure connection required for legally binding signatures.");
         return;
       }
 
@@ -58,19 +58,25 @@ export const SignatureCapture: React.FC<SignatureCaptureProps> = ({ recordId, on
         onSave(base64, hashHex);
       } catch (err) {
         console.error("Signature hashing failed:", err);
-        alert("Failed to process signature. Please try again.");
+        setErrorMessage("Failed to process signature. Please try again.");
       }
     } else if (signatureRef.current?.isEmpty()) {
-      alert("Please provide a signature before saving.");
+      setErrorMessage("Please provide a signature before saving.");
     }
   };
 
   const handleClear = () => {
+    setErrorMessage(null);
     signatureRef.current?.clear();
   };
 
   return (
     <div className="space-y-4">
+      {errorMessage && (
+        <div className="p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl text-[11px] font-bold uppercase tracking-wider text-center">
+          {errorMessage}
+        </div>
+      )}
       <div 
         ref={wrapperRef} 
         className="w-full h-48 border-2 border-slate-200 rounded-2xl bg-white overflow-hidden touch-none"

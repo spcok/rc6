@@ -13,7 +13,7 @@ export const useMedicalData = (animalId?: string) => {
     queryKey: ['medical_records'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('medical_logs').select('*');
+        const { data, error } = await supabase.from('medical_logs').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: ClinicalNote[] = data.map((item: Record<string, unknown>) => mapToCamelCase<ClinicalNote>(item));
@@ -38,7 +38,7 @@ export const useMedicalData = (animalId?: string) => {
     queryKey: ['mar_charts'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('mar_charts').select('*');
+        const { data, error } = await supabase.from('mar_charts').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: MARChart[] = data.map((item: Record<string, unknown>) => mapToCamelCase<MARChart>(item));
@@ -63,7 +63,7 @@ export const useMedicalData = (animalId?: string) => {
     queryKey: ['quarantine_records'],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase.from('quarantine_records').select('*');
+        const { data, error } = await supabase.from('quarantine_records').select('*').limit(2500);
         if (error) throw error;
         
         const mappedData: QuarantineRecord[] = data.map((item: Record<string, unknown>) => mapToCamelCase<QuarantineRecord>(item));

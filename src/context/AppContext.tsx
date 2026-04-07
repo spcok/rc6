@@ -22,8 +22,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const value: AppContextType = {
     orgProfile: {
-      name: settings?.org_name || DEFAULT_ORG_PROFILE.name,
-      logo_url: settings?.logo_url || DEFAULT_ORG_PROFILE.logo_url,
+      name: settings?.orgName || DEFAULT_ORG_PROFILE.name,
+      logoUrl: settings?.logoUrl || DEFAULT_ORG_PROFILE.logoUrl,
     },
     isLoading,
   };

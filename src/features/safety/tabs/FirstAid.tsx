@@ -7,11 +7,11 @@ import { FirstAidLog } from '../../../types';
 import { Plus, MapPin, X, Trash2, Loader2, Search, Lock } from 'lucide-react';
 
 const schema = z.object({
-  person_name: z.string().min(1, 'Name is required'),
+  personName: z.string().min(1, 'Name is required'),
   type: z.enum(['Injury', 'Illness', 'Near Miss']),
   location: z.string().min(1, 'Location is required'),
-  incident_description: z.string().min(1, 'Description is required'),
-  treatment_provided: z.string().optional(),
+  incidentDescription: z.string().min(1, 'Description is required'),
+  treatmentProvided: z.string().optional(),
   outcome: z.enum(['Returned to Work', 'Restricted Duties', 'Monitoring', 'Sent Home', 'GP Visit', 'Hospital', 'Ambulance Called', 'Refused Treatment', 'None']),
 });
 
@@ -38,11 +38,11 @@ const FirstAid: React.FC = () => {
         
         await addFirstAid({
           date, 
-          staff_id: data.person_name, // Using name as staff_id for now as per original
-          person_name: data.person_name,
+          staffId: data.personName, // Using name as staff_id for now as per original
+          personName: data.personName,
           type: data.type,
-          incident_description: data.incident_description,
-          treatment_provided: data.treatment_provided || '',
+          incidentDescription: data.incidentDescription,
+          treatmentProvided: data.treatmentProvided || '',
           location: data.location,
           outcome: data.outcome
         });
@@ -57,8 +57,8 @@ const FirstAid: React.FC = () => {
 
   const filteredLogs = useMemo(() => {
     return logs.filter(log => 
-      log.person_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.incident_description.toLowerCase().includes(searchTerm.toLowerCase())
+      log.personName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.incidentDescription.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [logs, searchTerm]);
 
@@ -133,12 +133,12 @@ const FirstAid: React.FC = () => {
                     <div className="font-bold text-slate-900 text-sm">{new Date(log.date).toLocaleDateString('en-GB')}</div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <span className="text-sm font-bold text-slate-900 block mb-0.5">{log.person_name}</span>
+                    <span className="text-sm font-bold text-slate-900 block mb-0.5">{log.personName}</span>
                     <div className="flex items-center gap-0.5 text-xs font-medium text-slate-500"><MapPin size={12}/> {log.location}</div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm line-clamp-2 italic border-l-2 border-slate-100 pl-2">"{log.incident_description}"</p>
-                    <div className="text-xs font-bold text-emerald-600 mt-0.5">ADMINISTERED: {log.treatment_provided || 'Observation Only'}</div>
+                    <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-sm line-clamp-2 italic border-l-2 border-slate-100 pl-2">"{log.incidentDescription}"</p>
+                    <div className="text-xs font-bold text-emerald-600 mt-0.5">ADMINISTERED: {log.treatmentProvided || 'Observation Only'}</div>
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border ${
@@ -174,7 +174,7 @@ const FirstAid: React.FC = () => {
             </div>
             <form onSubmit={handleSubmit} className="p-3 space-y-3 overflow-y-auto">
               <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-2">
-                <form.Field name="person_name" children={(field) => (
+                <form.Field name="personName" children={(field) => (
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-0.5">Subject Name</label>
                     <input type="text" required value={field.state.value} onChange={e => field.handleChange(e.target.value)} className={inputClass} placeholder="Full Legal Name"/>
@@ -216,14 +216,14 @@ const FirstAid: React.FC = () => {
                     <input type="text" required value={field.state.value} onChange={e => field.handleChange(e.target.value)} className={inputClass} placeholder="e.g. Flight Arena"/>
                   </div>
                 )} />
-                <form.Field name="treatment_provided" children={(field) => (
+                <form.Field name="treatmentProvided" children={(field) => (
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-0.5">Treatment Action</label>
                     <input type="text" value={field.state.value} onChange={e => field.handleChange(e.target.value)} className={inputClass} placeholder="e.g. Wound Cleaned"/>
                   </div>
                 )} />
               </div>
-              <form.Field name="incident_description" children={(field) => (
+              <form.Field name="incidentDescription" children={(field) => (
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-0.5">Full Incident Narrative</label>
                   <textarea required rows={2} value={field.state.value} onChange={e => field.handleChange(e.target.value)} className={`${inputClass} resize-none h-16`} placeholder="Detailed account of what happened..."/>
