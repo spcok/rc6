@@ -24,7 +24,8 @@ export const useAnimalsData = () => {
           }
         }
         return mappedData;
-      } catch {
+      } catch (err) {
+        console.error("SUPABASE FETCH FAILED:", err);
         console.warn("Network unreachable. Serving animals from local vault.");
         return await animalsCollection.getAll();
       }

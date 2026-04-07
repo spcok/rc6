@@ -1,17 +1,45 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useLiveQuery } from '@tanstack/react-db';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { User, RolePermissionConfig } from '../../types';
 import { usersCollection } from '../../lib/database';
 import { supabase } from '../../lib/supabase';
+import { mapToCamelCase } from '../../lib/dataMapping';
 
 export function useUsersData() {
   const queryClient = useQueryClient();
 
-  const { data: users = [], isLoading: isLoadingUsers } = useLiveQuery((q) => q.from({ users: usersCollection }));
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase.from('users').select('*').eq('is_deleted', false).limit(2500);
+        if (error) throw error;
+        
+        const mappedData: User[] = data.map((item: Record<string, unknown>) => mapToCamelCase<User>(item));
+        
+        for (const item of mappedData) {
+          try {
+            await usersCollection.update(item);
+          } catch {
+            await usersCollection.insert(item);
+          }
+        }
+        
+        return mappedData;
+      } catch {
+        console.warn("Network unreachable. Serving from local vault.");
+        return await usersCollection.getAll();
+      }
+    }
+  });
 
-  // Note: Role permissions are not yet in a collection, keeping as is for now or refactoring if needed.
-  // Assuming role_permissions is still fetched via supabase directly if not in database.ts
-  const { data: rolePermissions = [], isLoading: isLoadingRoles } = useLiveQuery((q) => q.from({ role_permissions: usersCollection })); // Placeholder
+  const { data: rolePermissions = [], isLoading: isLoadingRoles } = useQuery<RolePermissionConfig[]>({
+    queryKey: ['role_permissions'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('role_permissions').select('*');
+      if (error) throw error;
+      return (data as RolePermissionConfig[]) || [];
+    }
+  });
 
   const isLoading = isLoadingUsers || isLoadingRoles;
 
@@ -19,7 +47,8 @@ export function useUsersData() {
     mutationFn: async ({ id, updates }: { id: string, updates: Partial<User> }) => {
       const existing = users.find(u => u.id === id);
       if (existing) {
-        await usersCollection.update({ ...existing, ...updates });
+        const updated = { ...existing, ...updates };
+        await usersCollection.update(updated);
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
@@ -29,7 +58,7 @@ export function useUsersData() {
     mutationFn: async (id: string) => {
       const existing = users.find(u => u.id === id);
       if (existing) {
-        await usersCollection.update({ ...existing, is_deleted: true });
+        await usersCollection.update({ ...existing, isDeleted: true });
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
@@ -49,7 +78,6 @@ export function useUsersData() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
 
-  // Role permissions mutation needs to be kept as is if not in database.ts
   const updateRolePermissionsMutation = useMutation({
     mutationFn: async ({ role, updates }: { role: string, updates: Partial<RolePermissionConfig> }) => {
       const { error } = await supabase
@@ -62,7 +90,7 @@ export function useUsersData() {
   });
 
   return { 
-    users: users.filter(u => !u.is_deleted), 
+    users: users.filter(u => !u.isDeleted), 
     rolePermissions, 
     isLoading, 
     deleteUser: deleteUserMutation.mutateAsync, 

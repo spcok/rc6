@@ -31,7 +31,8 @@ export const useDailyLogData = (_viewDate: string, activeCategory: AnimalCategor
         }
         
         return mappedData;
-      } catch {
+      } catch (err) {
+        console.error("SUPABASE FETCH FAILED:", err);
         console.warn("Network unreachable. Serving from local vault.");
         return await dailyLogsCollection.getAll();
       }

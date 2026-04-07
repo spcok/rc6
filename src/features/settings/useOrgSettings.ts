@@ -45,7 +45,7 @@ export function useOrgSettings() {
       } catch {
         console.warn("Offline: Updating settings locally.");
       }
-      await orgSettingsCollection.update(newSettings.id, () => newSettings);
+      await orgSettingsCollection.update(newSettings);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['orgSettings'] })
   });
