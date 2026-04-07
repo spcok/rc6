@@ -35,8 +35,15 @@ export const useZLADocsData = () => {
   const addDocumentMutation = useMutation({
     mutationFn: async (doc: Omit<ZLADocument, 'id'>) => {
       const payload = { ...doc, id: crypto.randomUUID(), isDeleted: false } as ZLADocument;
+      
+      const supabasePayload = {
+        ...payload,
+        is_deleted: payload.isDeleted,
+      };
+      delete (supabasePayload as any).isDeleted;
+
       try {
-        const { error } = await supabase.from('zla_documents').insert([payload]);
+        const { error } = await supabase.from('zla_documents').insert([supabasePayload]);
         if (error) throw error;
       } catch {
         console.warn("Offline: Adding document locally.");

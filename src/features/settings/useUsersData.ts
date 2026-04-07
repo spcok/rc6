@@ -46,10 +46,24 @@ export function useUsersData() {
   const updateUserMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string, updates: Partial<User> }) => {
       const existing = users.find(u => u.id === id);
-      if (existing) {
-        const updated = { ...existing, ...updates };
-        await usersCollection.update(updated);
+      if (!existing) return;
+      const updated = { ...existing, ...updates };
+
+      // CRITICAL FIX: Ensure changes push to Supabase before updating local vault
+      try {
+        const { error } = await supabase.from('users').update({
+          name: updated.name,
+          role: updated.role,
+          initials: updated.initials,
+          is_active: updated.isActive,
+          is_deleted: updated.isDeleted,
+        }).eq('id', id);
+        if (error) throw error;
+      } catch {
+        console.warn("Offline: Updating user locally.");
       }
+
+      await usersCollection.update(updated);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });
@@ -57,9 +71,19 @@ export function useUsersData() {
   const deleteUserMutation = useMutation({
     mutationFn: async (id: string) => {
       const existing = users.find(u => u.id === id);
-      if (existing) {
-        await usersCollection.update({ ...existing, isDeleted: true });
+      if (!existing) return;
+      
+      const updated = { ...existing, isDeleted: true };
+
+      // CRITICAL FIX: Tell Supabase the user is deleted
+      try {
+        const { error } = await supabase.from('users').update({ is_deleted: true }).eq('id', id);
+        if (error) throw error;
+      } catch {
+        console.warn("Offline: Deleting user locally.");
       }
+
+      await usersCollection.update(updated);
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['users'] }),
   });

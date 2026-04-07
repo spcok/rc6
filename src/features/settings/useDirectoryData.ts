@@ -35,8 +35,16 @@ export const useDirectoryData = () => {
   const addContactMutation = useMutation({
     mutationFn: async (contact: Omit<Contact, 'id'>) => {
       const payload = { ...contact, id: crypto.randomUUID(), isDeleted: false } as Contact;
+      
+      // Payload Integrity Mappings
+      const supabasePayload = {
+        ...payload,
+        is_deleted: payload.isDeleted
+      };
+      delete (supabasePayload as any).isDeleted;
+
       try {
-        const { error } = await supabase.from('directory').insert([payload]);
+        const { error } = await supabase.from('directory').insert([supabasePayload]);
         if (error) throw error;
       } catch {
         console.warn("Offline: Adding contact locally.");
@@ -52,8 +60,16 @@ export const useDirectoryData = () => {
       const existing = contacts.find(c => c.id === contact.id);
       if (existing) {
         const updated = { ...existing, ...contact } as Contact;
+        
+        // Payload Integrity Mappings
+        const supabasePayload = {
+          ...updated,
+          is_deleted: updated.isDeleted
+        };
+        delete (supabasePayload as any).isDeleted;
+
         try {
-          const { error } = await supabase.from('directory').update(updated).eq('id', contact.id);
+          const { error } = await supabase.from('directory').update(supabasePayload).eq('id', contact.id);
           if (error) throw error;
         } catch {
           console.warn("Offline: Updating contact locally.");
